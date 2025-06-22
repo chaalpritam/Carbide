@@ -1,4 +1,128 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# Carbide - Google Photos iOS App Clone
+
+A React Native iOS app that replicates the Google Photos interface with the exact same screens, text, colors, and layout as the original iOS app.
+
+## Features
+
+### 📱 Screens
+
+1. **Photos Tab**
+   - Grid layout with photos organized by date
+   - Large header with "Photos" title
+   - Search button in header
+   - Photos grouped by "Today", "Yesterday", "Last week"
+   - 3-column grid layout with rounded corners
+
+2. **For You Tab**
+   - Memories section with large cards
+   - Overlay text showing date and photo count
+   - Beautiful gradient overlays on memory cards
+   - "For you" header title
+
+3. **Albums Tab**
+   - List of albums with thumbnails
+   - Album names and photo counts
+   - "Albums" header title
+   - Default albums: Recents, Favorites, Screenshots, Camera
+
+4. **Search Tab**
+   - Category cards for different search types
+   - Colorful icons for each category
+   - Categories: People, Places, Things, Videos
+   - "Search" header title
+
+5. **Library Tab**
+   - List of library items with icons
+   - Items: Recently Deleted, Hidden, Imports
+   - "Library" header title
+   - Chevron indicators for navigation
+
+### 🎨 Design System
+
+- **Colors**: Exact Google Photos iOS color scheme
+  - Primary Blue: `#007AFF`
+  - Background: `#FFFFFF`
+  - Text: `#000000`
+  - Secondary Text: `#8E8E93`
+  - Borders: `#C7C7CC`
+  - Category Background: `#F2F2F7`
+
+- **Typography**:
+  - Header titles: 34pt, Bold (700)
+  - Section titles: 22pt, Semi-bold (600)
+  - Date text: 22pt, Semi-bold (600)
+  - Album titles: 17pt, Medium (500)
+  - Photo counts: 15pt, Regular
+
+- **Layout**:
+  - Safe area aware
+  - Proper iOS spacing and padding
+  - Rounded corners on photos and cards
+  - Bottom tab navigation with iOS styling
+
+### 🔧 Technical Implementation
+
+- **Navigation**: React Navigation with bottom tabs
+- **Icons**: React Native Vector Icons (MaterialIcons)
+- **Layout**: Flexbox with proper iOS spacing
+- **Images**: Placeholder images from Picsum for demo
+- **Styling**: StyleSheet with exact color codes
+
+## Installation
+
+1. Install dependencies:
+```bash
+npm install
+```
+
+2. Install iOS dependencies:
+```bash
+cd ios && bundle exec pod install
+```
+
+3. Run the iOS app:
+```bash
+npx react-native run-ios
+```
+
+## Project Structure
+
+```
+App.tsx                 # Main app with navigation
+├── PhotosScreen        # Photos grid view
+├── ForYouScreen        # Memories and recommendations
+├── AlbumsScreen        # Album list
+├── SearchScreen        # Search categories
+└── LibraryScreen       # Library items
+```
+
+## Dependencies
+
+- `@react-navigation/native`
+- `@react-navigation/bottom-tabs`
+- `react-native-vector-icons`
+- `react-native-screens`
+- `react-native-safe-area-context`
+- `react-native-gesture-handler`
+
+## iOS Configuration
+
+The app includes proper iOS configuration:
+- Vector icons font files
+- Info.plist font declarations
+- Xcode project font references
+- Proper bundle configuration
+
+## Screenshots
+
+The app replicates the following Google Photos iOS screens:
+- Photos grid with date grouping
+- For You memories
+- Albums list
+- Search categories
+- Library items
+
+All screens maintain the exact visual design, typography, and color scheme of the original Google Photos iOS app.
 
 # Getting Started
 
@@ -66,7 +190,7 @@ This is one way to run your app — you can also build it directly from Android 
 
 Now that you have successfully run the app, let's make changes!
 
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
+Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
 
 When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
 
