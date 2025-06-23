@@ -1,10 +1,10 @@
 # Carbide - Google Photos iOS App Clone
 
-A React Native iOS app that replicates the Google Photos interface with the exact same screens, text, colors, and layout as the original iOS app.
+A React Native iOS app that replicates the Google Photos interface with the exact same screens, text, colors, and layout as the original iOS app, including detailed views and photo permissions.
 
 ## Features
 
-### 📱 Screens
+### 📱 Screens & Navigation
 
 1. **Photos Tab**
    - Grid layout with photos organized by date
@@ -12,30 +12,43 @@ A React Native iOS app that replicates the Google Photos interface with the exac
    - Search button in header
    - Photos grouped by "Today", "Yesterday", "Last week"
    - 3-column grid layout with rounded corners
+   - **Photo Detail Screen**: Full-screen photo view with edit, crop, filter actions
 
 2. **For You Tab**
    - Memories section with large cards
    - Overlay text showing date and photo count
    - Beautiful gradient overlays on memory cards
    - "For you" header title
+   - **Memory Detail Screen**: Expanded memory view with related photos
 
 3. **Albums Tab**
    - List of albums with thumbnails
    - Album names and photo counts
    - "Albums" header title
    - Default albums: Recents, Favorites, Screenshots, Camera
+   - **Album Detail Screen**: Grid view of album photos with slideshow and select options
 
 4. **Search Tab**
    - Category cards for different search types
    - Colorful icons for each category
    - Categories: People, Places, Things, Videos
    - "Search" header title
+   - **Search Results Screen**: Detailed results for each category with photo counts
 
 5. **Library Tab**
    - List of library items with icons
    - Items: Recently Deleted, Hidden, Imports
    - "Library" header title
    - Chevron indicators for navigation
+   - **Library Detail Screen**: Content-specific views with empty states
+
+### 🔐 Photo Permissions
+
+- **iOS Photo Library Access**: Proper permission requests with user-friendly dialogs
+- **Permission Request Screen**: Beautiful onboarding screen explaining photo access needs
+- **Automatic Permission Checking**: App checks permissions on startup
+- **Graceful Fallback**: Shows permission request if access not granted
+- **Settings Integration**: Directs users to iOS Settings if permission denied
 
 ### 🎨 Design System
 
@@ -59,14 +72,50 @@ A React Native iOS app that replicates the Google Photos interface with the exac
   - Proper iOS spacing and padding
   - Rounded corners on photos and cards
   - Bottom tab navigation with iOS styling
+  - Stack navigation for detail screens
 
 ### 🔧 Technical Implementation
 
-- **Navigation**: React Navigation with bottom tabs
+- **Navigation**: React Navigation with bottom tabs and stack navigators
 - **Icons**: React Native Vector Icons (MaterialIcons)
+- **Permissions**: React Native Permissions with iOS/Android support
 - **Layout**: Flexbox with proper iOS spacing
 - **Images**: Placeholder images from Picsum for demo
 - **Styling**: StyleSheet with exact color codes
+- **State Management**: React hooks for permission state
+
+### 📱 Detail Screen Features
+
+#### Photo Detail Screen
+- Full-screen photo display
+- Action buttons: Favorite, Share, More options
+- Photo information: Date, location
+- Edit actions: Edit, Crop, Filter buttons
+
+#### Memory Detail Screen
+- Large memory card display
+- Memory title and photo count
+- Related photos grid
+- Share functionality
+
+#### Album Detail Screen
+- Album header with photo count
+- Action buttons: Slideshow, Select
+- Photo grid with album photos
+- Album-specific actions
+
+#### Search Results Screen
+- Category-specific results
+- People: Name, photo count, profile images
+- Places: Location, photo count, location images
+- Things: Category, photo count, category images
+- Videos: Title, duration, video thumbnails
+
+#### Library Detail Screen
+- Content-specific layouts
+- Recently Deleted: Empty state with delete icon
+- Hidden: Empty state with visibility icon
+- Imports: Photo grid with import dates
 
 ## Installation
 
@@ -88,41 +137,69 @@ npx react-native run-ios
 ## Project Structure
 
 ```
-App.tsx                 # Main app with navigation
-├── PhotosScreen        # Photos grid view
-├── ForYouScreen        # Memories and recommendations
-├── AlbumsScreen        # Album list
-├── SearchScreen        # Search categories
-└── LibraryScreen       # Library items
+App.tsx                 # Main app with navigation and permissions
+├── PermissionRequest   # Photo permission request screen
+├── PhotosStack         # Photos tab with detail navigation
+│   ├── PhotosScreen    # Photos grid view
+│   └── PhotoDetail     # Photo detail screen
+├── ForYouStack         # For You tab with detail navigation
+│   ├── ForYouScreen    # Memories view
+│   └── MemoryDetail    # Memory detail screen
+├── AlbumsStack         # Albums tab with detail navigation
+│   ├── AlbumsScreen    # Album list
+│   └── AlbumDetail     # Album detail screen
+├── SearchStack         # Search tab with detail navigation
+│   ├── SearchScreen    # Search categories
+│   └── SearchResults   # Search results screen
+└── LibraryStack        # Library tab with detail navigation
+    ├── LibraryScreen   # Library items
+    └── LibraryDetail   # Library detail screen
 ```
 
 ## Dependencies
 
 - `@react-navigation/native`
 - `@react-navigation/bottom-tabs`
+- `@react-navigation/stack`
 - `react-native-vector-icons`
 - `react-native-screens`
 - `react-native-safe-area-context`
 - `react-native-gesture-handler`
+- `react-native-permissions`
 
 ## iOS Configuration
 
 The app includes proper iOS configuration:
 - Vector icons font files
 - Info.plist font declarations
+- Photo library permissions
 - Xcode project font references
 - Proper bundle configuration
+
+## Permissions
+
+### iOS Permissions
+- `NSPhotoLibraryUsageDescription`: Access to read photos
+- `NSPhotoLibraryAddUsageDescription`: Access to save photos
+
+### Permission Flow
+1. App checks photo permissions on startup
+2. Shows permission request screen if not granted
+3. Requests permission with user-friendly dialog
+4. Handles permission denial gracefully
+5. Provides settings access for manual permission enabling
 
 ## Screenshots
 
 The app replicates the following Google Photos iOS screens:
-- Photos grid with date grouping
-- For You memories
-- Albums list
-- Search categories
-- Library items
+- Photos grid with date grouping and detail views
+- For You memories with expanded memory views
+- Albums list with detailed album views
+- Search categories with result screens
+- Library items with content-specific detail views
+- Permission request screen with iOS styling
 
-All screens maintain the exact visual design, typography, and color scheme of the original Google Photos iOS app.
+All screens maintain the exact visual design, typography, and color scheme of the original Google Photos iOS app, with additional detail screens providing a complete user experience.
 
 # Getting Started
 
