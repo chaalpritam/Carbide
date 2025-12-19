@@ -65,10 +65,6 @@ struct HomeView: View {
                                 .foregroundColor(Theme.surfaceSecondary)
                             Text("No files yet")
                                 .foregroundColor(Theme.textSecondary)
-                            Button("Add Sample Data") {
-                                seedData()
-                            }
-                            .buttonStyle(.bordered)
                         }
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 40)
@@ -94,13 +90,6 @@ struct HomeView: View {
         .background(Theme.surface)
         .cornerRadius(20)
         .shadow(color: Theme.cardShadow, radius: 4, x: 0, y: 2)
-    }
-    
-    private func seedData() {
-        let items = FileItem.mockData
-        for item in items {
-            modelContext.insert(item)
-        }
     }
 }
 
