@@ -7,6 +7,10 @@ struct FilesView: View {
     @Query(filter: #Predicate<FileItem> { $0.parent == nil }, sort: [SortDescriptor(\FileItem.name)]) var rootFiles: [FileItem]
     
     @State private var viewMode: ViewMode = .list
+    @State private var showingAddOptions = false
+    @State private var showingRenameSheet = false
+    @State private var itemToRename: FileItem?
+    @State private var newName = ""
     
     enum ViewMode {
         case list, grid
@@ -42,14 +46,32 @@ struct FilesView: View {
             if viewMode == .list {
                 List {
                     ForEach(rootFiles) { item in
-                        if item.type == .folder {
-                            NavigationLink(destination: FolderDetailView(folder: item)) {
-                                FolderRowView(item: item)
+                        Group {
+                            if item.type == .folder {
+                                NavigationLink(destination: FolderDetailView(folder: item)) {
+                                    FolderRowView(item: item)
+                                }
+                            } else {
+                                NavigationLink(destination: FileDetailView(item: item)) {
+                                    FolderRowView(item: item)
+                                }
                             }
-                        } else {
-                            NavigationLink(destination: FileDetailView(item: item)) {
-                                FolderRowView(item: item)
+                        }
+                        .swipeActions(edge: .trailing) {
+                            Button(role: .destructive) {
+                                modelContext.delete(item)
+                            } label: {
+                                Label("Delete", systemImage: "trash")
                             }
+                            
+                            Button {
+                                itemToRename = item
+                                newName = item.name
+                                showingRenameSheet = true
+                            } label: {
+                                Label("Rename", systemImage: "pencil")
+                            }
+                            .tint(.orange)
                         }
                     }
                     .onDelete(perform: deleteItems)
@@ -78,17 +100,54 @@ struct FilesView: View {
         .navigationTitle("My Drive")
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
-                Button(action: addItem) {
+                Button(action: { showingAddOptions = true }) {
                     Image(systemName: "plus.circle.fill")
                         .font(.title3)
                         .foregroundColor(Theme.primary)
                 }
             }
         }
+        .confirmationDialog("Add New", isPresented: $showingAddOptions) {
+            Button("New Folder") { addItem(type: .folder) }
+            Button("Upload Photo") { addItem(type: .image) }
+            Button("New Document") { addItem(type: .document) }
+            Button("Cancel", role: .cancel) { }
+        }
+        .sheet(isPresented: $showingRenameSheet) {
+            NavigationStack {
+                Form {
+                    TextField("Name", text: $newName)
+                }
+                .navigationTitle("Rename")
+                .toolbar {
+                    ToolbarItem(placement: .cancellationAction) {
+                        Button("Cancel") { showingRenameSheet = false }
+                    }
+                    ToolbarItem(placement: .confirmationAction) {
+                        Button("Save") {
+                            if let item = itemToRename {
+                                item.name = newName
+                                try? modelContext.save()
+                            }
+                            showingRenameSheet = false
+                        }
+                    }
+                }
+            }
+            .presentationDetents([.medium])
+        }
     }
     
-    private func addItem() {
-        let newItem = FileItem(name: "New Folder", type: .folder)
+    private func addItem(type: FileType) {
+        let name: String
+        switch type {
+        case .folder: name = "New Folder"
+        case .image: name = "New Photo.jpg"
+        case .document: name = "New Document.docx"
+        default: name = "New Item"
+        }
+        
+        let newItem = FileItem(name: name, type: type)
         modelContext.insert(newItem)
     }
     

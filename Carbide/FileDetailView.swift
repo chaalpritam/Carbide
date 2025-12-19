@@ -2,7 +2,8 @@
 import SwiftUI
 
 struct FileDetailView: View {
-    let item: FileItem
+    @Bindable var item: FileItem
+    @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
     
     var body: some View {
@@ -34,10 +35,20 @@ struct FileDetailView: View {
                 
                 // Primary Actions
                 HStack(spacing: 20) {
-                    actionButton(icon: "square.and.arrow.up", label: "Share")
-                    actionButton(icon: item.isStarred ? "star.fill" : "star", label: "Star", color: item.isStarred ? Theme.tertiary : Theme.textMain)
-                    actionButton(icon: "arrow.down.circle", label: "Download")
-                    actionButton(icon: "trash", label: "Delete", color: Theme.secondary)
+                    actionButton(icon: "square.and.arrow.up", label: "Share") {
+                        // Share logic
+                    }
+                    actionButton(icon: item.isStarred ? "star.fill" : "star", label: "Star", color: item.isStarred ? Theme.tertiary : Theme.textMain) {
+                        item.isStarred.toggle()
+                        item.modifiedAt = Date()
+                    }
+                    actionButton(icon: "arrow.down.circle", label: "Download") {
+                        // Download logic
+                    }
+                    actionButton(icon: "trash", label: "Delete", color: Theme.secondary) {
+                        modelContext.delete(item)
+                        dismiss()
+                    }
                 }
                 .padding(.horizontal)
                 
@@ -70,8 +81,8 @@ struct FileDetailView: View {
         .navigationBarTitleDisplayMode(.inline)
     }
     
-    private func actionButton(icon: String, label: String, color: Color = Theme.textMain) -> some View {
-        Button(action: {}) {
+    private func actionButton(icon: String, label: String, color: Color = Theme.textMain, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
             VStack(spacing: 8) {
                 Image(systemName: icon)
                     .font(.title3)
