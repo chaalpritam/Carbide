@@ -30,8 +30,7 @@ struct ContentView: View {
             .tag(1)
             
             NavigationStack {
-                Text("Shared View")
-                    .navigationTitle("Shared")
+                SharedView()
             }
             .tabItem {
                 Label("Shared", systemImage: "person.2.fill")
@@ -39,8 +38,7 @@ struct ContentView: View {
             .tag(2)
             
             NavigationStack {
-                Text("Settings View")
-                    .navigationTitle("Settings")
+                SettingsView()
             }
             .tabItem {
                 Label("Settings", systemImage: "gear")

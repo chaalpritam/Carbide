@@ -42,8 +42,14 @@ struct FilesView: View {
             if viewMode == .list {
                 List {
                     ForEach(rootFiles) { item in
-                        NavigationLink(destination: FolderDetailView(folder: item)) {
-                            FolderRowView(item: item)
+                        if item.type == .folder {
+                            NavigationLink(destination: FolderDetailView(folder: item)) {
+                                FolderRowView(item: item)
+                            }
+                        } else {
+                            NavigationLink(destination: FileDetailView(item: item)) {
+                                FolderRowView(item: item)
+                            }
                         }
                     }
                     .onDelete(perform: deleteItems)
@@ -53,8 +59,14 @@ struct FilesView: View {
                 ScrollView {
                     LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 16) {
                         ForEach(rootFiles) { item in
-                            NavigationLink(destination: FolderDetailView(folder: item)) {
-                                FileCardView(item: item)
+                            if item.type == .folder {
+                                NavigationLink(destination: FolderDetailView(folder: item)) {
+                                    FileCardView(item: item)
+                                }
+                            } else {
+                                NavigationLink(destination: FileDetailView(item: item)) {
+                                    FileCardView(item: item)
+                                }
                             }
                         }
                     }
@@ -94,7 +106,15 @@ struct FolderDetailView: View {
         List {
             if !folder.children.isEmpty {
                 ForEach(folder.children) { child in
-                    FolderRowView(item: child)
+                    if child.type == .folder {
+                        NavigationLink(destination: FolderDetailView(folder: child)) {
+                            FolderRowView(item: child)
+                        }
+                    } else {
+                        NavigationLink(destination: FileDetailView(item: child)) {
+                            FolderRowView(item: child)
+                        }
+                    }
                 }
             } else {
                 ContentUnavailableView("Folder is Empty", systemImage: "folder.badge.minus", description: Text("Upload files to see them here"))

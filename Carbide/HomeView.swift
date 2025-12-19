@@ -51,7 +51,9 @@ struct HomeView: View {
                     
                     LazyVGrid(columns: columns, spacing: 16) {
                         ForEach(Array(recentFiles.prefix(4))) { file in
-                            FileCardView(item: file)
+                            NavigationLink(destination: FileDetailView(item: file)) {
+                                FileCardView(item: file)
+                            }
                         }
                     }
                     .padding(.horizontal)
