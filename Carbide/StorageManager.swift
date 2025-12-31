@@ -6,7 +6,7 @@ import SwiftData
 // 2. Uncomment the import line below
 // 3. Build and run
 
-// import CarbideSDK
+import CarbideSDK
 
 /// Manager for Carbide network storage operations
 ///
@@ -41,7 +41,7 @@ import SwiftData
 @Observable
 final class StorageManager {
     // Uncomment when SDK is added to project
-    // private let client: CarbideClient
+    private let client: CarbideClient
     private let modelContext: ModelContext
 
     /// Initialize storage manager
@@ -50,8 +50,8 @@ final class StorageManager {
         self.modelContext = modelContext
 
         // Uncomment when SDK is added
-        // let discoveryURL = URL(string: "http://localhost:9090")!
-        // self.client = CarbideClient(discoveryServiceURL: discoveryURL)
+        let discoveryURL = URL(string: "http://localhost:9090")!
+        self.client = CarbideClient(discoveryServiceURL: discoveryURL)
     }
 
     // MARK: - File Upload
@@ -67,8 +67,6 @@ final class StorageManager {
         encrypt: Bool = true,
         progress: @escaping (Double) -> Void
     ) async throws -> FileItem {
-        // TODO: Uncomment when SDK is integrated
-        /*
         // 1. Get available providers
         let providers = try await client.searchProviders(
             region: .northAmerica,
@@ -110,21 +108,6 @@ final class StorageManager {
         try modelContext.save()
 
         return fileItem
-        */
-
-        // Placeholder implementation until SDK is integrated
-        let fileName = fileURL.lastPathComponent
-        let fileData = try Data(contentsOf: fileURL)
-        let fileItem = FileItem(
-            name: fileName,
-            type: determineFileType(from: fileURL),
-            size: Int64(fileData.count)
-        )
-
-        modelContext.insert(fileItem)
-        try modelContext.save()
-
-        return fileItem
     }
 
     // MARK: - File Download
@@ -133,8 +116,6 @@ final class StorageManager {
     /// - Parameter item: FileItem with Carbide metadata
     /// - Returns: Downloaded file data
     func downloadFile(item: FileItem) async throws -> Data {
-        // TODO: Uncomment when SDK is integrated
-        /*
         guard let fileID = item.carbideFileID,
               let providerID = item.carbideProviderID else {
             throw NSError(domain: "StorageManager", code: 400, userInfo: [
@@ -155,20 +136,12 @@ final class StorageManager {
         )
 
         return data
-        */
-
-        // Placeholder
-        throw NSError(domain: "StorageManager", code: 501, userInfo: [
-            NSLocalizedDescriptionKey: "Download not implemented yet. Please add CarbideSDK to project."
-        ])
     }
 
     // MARK: - Synchronization
 
     /// Sync all files from Carbide network to local SwiftData
     func syncFiles() async throws {
-        // TODO: Uncomment when SDK is integrated
-        /*
         let providers = try await client.listProviders()
 
         for provider in providers {
@@ -200,14 +173,11 @@ final class StorageManager {
         }
 
         try modelContext.save()
-        */
     }
 
     /// Delete file from Carbide network
     /// - Parameter item: FileItem to delete
     func deleteFromCarbide(item: FileItem) async throws {
-        // TODO: Uncomment when SDK is integrated
-        /*
         guard let fileID = item.carbideFileID,
               let providerID = item.carbideProviderID else {
             return
@@ -227,7 +197,6 @@ final class StorageManager {
         item.isSyncedToCarbide = false
 
         try modelContext.save()
-        */
     }
 
     // MARK: - Helper Methods

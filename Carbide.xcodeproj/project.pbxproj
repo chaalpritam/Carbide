@@ -112,6 +112,7 @@
 			);
 			name = Carbide;
 			packageProductDependencies = (
+				6B4425D92F056A740011009C /* CarbideSDK */,
 			);
 			productName = Carbide;
 			productReference = 6B815F012EF5B88C0063D062 /* Carbide.app */;
@@ -195,6 +196,9 @@
 			);
 			mainGroup = 6B815EF82EF5B88C0063D062;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				6B4425D82F056A740011009C /* XCLocalSwiftPackageReference "../carbide-ios-sdk" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 6B815F022EF5B88C0063D062 /* Products */;
 			projectDirPath = "";
@@ -558,6 +562,21 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		6B4425D82F056A740011009C /* XCLocalSwiftPackageReference "../carbide-ios-sdk" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = "../carbide-ios-sdk";
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		6B4425D92F056A740011009C /* CarbideSDK */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 6B4425D82F056A740011009C /* XCLocalSwiftPackageReference "../carbide-ios-sdk" */;
+			productName = CarbideSDK;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 6B815EF92EF5B88C0063D062 /* Project object */;
 }

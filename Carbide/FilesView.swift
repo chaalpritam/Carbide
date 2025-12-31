@@ -1,6 +1,7 @@
 
 import SwiftUI
 import SwiftData
+import PhotosUI
 
 struct FilesView: View {
     @Environment(\.modelContext) private var modelContext
@@ -11,7 +12,12 @@ struct FilesView: View {
     @State private var showingRenameSheet = false
     @State private var itemToRename: FileItem?
     @State private var newName = ""
-    
+    @State private var storageManager: StorageManager?
+    @State private var selectedPhoto: PhotosPickerItem?
+    @State private var uploadProgress: Double = 0.0
+    @State private var isUploading = false
+    @State private var uploadError: String?
+
     enum ViewMode {
         case list, grid
     }
@@ -95,6 +101,22 @@ struct FilesView: View {
                     .padding()
                 }
             }
+
+            if isUploading {
+                VStack {
+                    ProgressView(value: uploadProgress, total: 1.0) {
+                        Text("Uploading to Carbide...")
+                    }
+                    .padding()
+                }
+            }
+
+            if let error = uploadError {
+                Text(error)
+                    .foregroundColor(.red)
+                    .font(.caption)
+                    .padding()
+            }
         }
         .background(Theme.background)
         .navigationTitle("My Drive")
@@ -109,9 +131,14 @@ struct FilesView: View {
         }
         .confirmationDialog("Add New", isPresented: $showingAddOptions) {
             Button("New Folder") { addItem(type: .folder) }
-            Button("Upload Photo") { addItem(type: .image) }
+            PhotosPicker(selection: $selectedPhoto, matching: .images) {
+                Text("Upload Photo")
+            }
             Button("New Document") { addItem(type: .document) }
             Button("Cancel", role: .cancel) { }
+        }
+        .onChange(of: selectedPhoto) { _, newValue in
+            Task { await uploadPhoto(newValue) }
         }
         .sheet(isPresented: $showingRenameSheet) {
             NavigationStack {
@@ -136,8 +163,13 @@ struct FilesView: View {
             }
             .presentationDetents([.medium])
         }
+        .onAppear {
+            if storageManager == nil {
+                storageManager = StorageManager(modelContext: modelContext)
+            }
+        }
     }
-    
+
     private func addItem(type: FileType) {
         let name: String
         switch type {
@@ -154,6 +186,55 @@ struct FilesView: View {
     private func deleteItems(offsets: IndexSet) {
         for index in offsets {
             modelContext.delete(rootFiles[index])
+        }
+    }
+
+    private func uploadPhoto(_ item: PhotosPickerItem?) async {
+        guard let item = item else { return }
+
+        uploadError = nil
+        isUploading = true
+        uploadProgress = 0.0
+
+        do {
+            // Load photo data
+            guard let data = try await item.loadTransferable(type: Data.self) else {
+                throw NSError(domain: "FilesView", code: 1,
+                             userInfo: [NSLocalizedDescriptionKey: "Could not load photo data"])
+            }
+
+            // Write to temp file
+            let tempURL = FileManager.default.temporaryDirectory
+                .appendingPathComponent(UUID().uuidString)
+                .appendingPathExtension("jpg")
+
+            try data.write(to: tempURL)
+
+            // Upload via StorageManager
+            let fileItem = try await storageManager?.uploadFile(
+                from: tempURL,
+                encrypt: true,
+                progress: { progress in
+                    Task { @MainActor in
+                        uploadProgress = progress
+                    }
+                }
+            )
+
+            // Cleanup temp file
+            try? FileManager.default.removeItem(at: tempURL)
+
+            // Reset state
+            await MainActor.run {
+                isUploading = false
+                selectedPhoto = nil
+            }
+
+        } catch {
+            await MainActor.run {
+                uploadError = "Upload failed: \(error.localizedDescription)"
+                isUploading = false
+            }
         }
     }
 }
