@@ -47,12 +47,19 @@ final class FileItem: Identifiable {
     var modifiedAt: Date
     var isStarred: Bool
     var isShared: Bool
-    
+
+    // Carbide network metadata
+    var carbideFileID: String? // File hash from Carbide network
+    var carbideProviderID: String? // Provider UUID
+    var carbideProviderEndpoint: String? // Provider endpoint URL
+    var isEncrypted: Bool = false
+    var isSyncedToCarbide: Bool = false
+
     @Relationship(deleteRule: .cascade, inverse: \FileItem.parent)
     var children: [FileItem] = []
-    
+
     var parent: FileItem?
-    
+
     init(name: String, type: FileType, size: Int64 = 0, isStarred: Bool = false, isShared: Bool = false) {
         self.id = UUID()
         self.name = name

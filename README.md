@@ -18,11 +18,40 @@ Carbide is a premium mobile experience that combines the best of **Google Storag
 -   **SwiftData**: Next-generation data persistence and modeling.
 -   **Google Design Principles**: Clean, vibrant, and user-centric aesthetics.
 
+## Prerequisites
+
+- **Xcode 15.0+** (for SwiftUI and SwiftData support)
+- **macOS 13.0+** or **iOS 17.0+**
+- Swift 5.9+
+
 ## Getting Started
 
-1.  Open `Carbide.xcodeproj`.
-2.  Run the app on an iOS Simulator or Mac.
-3.  The app will automatically seed itself with demo data on first launch!
+1.  Clone the repository:
+    ```bash
+    git clone <repository-url>
+    cd Carbide
+    ```
+
+2.  Open `Carbide.xcodeproj` in Xcode.
+
+3.  Select your target device (iOS Simulator or Mac) from the scheme selector.
+
+4.  Build and run the project (⌘R).
+
+5.  The app will automatically seed itself with demo data on first launch!
+
+## Development
+
+This project uses standard Xcode project structure. User-specific files and build artifacts are excluded via `.gitignore`.
+
+### Project Structure
+
+- `Carbide/` - Main application source code
+  - SwiftUI views and components
+  - SwiftData models and persistence
+  - Storage management utilities
+- `CarbideTests/` - Unit tests
+- `CarbideUITests/` - UI tests
 
 ---
 Built with ❤️ for a better file management experience.
