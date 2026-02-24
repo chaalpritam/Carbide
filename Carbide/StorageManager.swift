@@ -49,8 +49,7 @@ final class StorageManager {
     init(modelContext: ModelContext) {
         self.modelContext = modelContext
 
-        // Uncomment when SDK is added
-        let discoveryURL = URL(string: "http://localhost:9090")!
+        let discoveryURL = URL(string: "https://discovery.carbidenetwork.xyz")!
         self.client = CarbideClient(discoveryServiceURL: discoveryURL)
     }
 
