@@ -38,16 +38,10 @@ struct HomeView: View {
                 
                 // Recent Files
                 VStack(alignment: .leading, spacing: 16) {
-                    HStack {
-                        Text("Recent Files")
-                            .font(.title3)
-                            .fontWeight(.bold)
-                        Spacer()
-                        Button("View All") { }
-                            .font(.subheadline)
-                            .foregroundColor(Theme.primary)
-                    }
-                    .padding(.horizontal)
+                    Text("Recent Files")
+                        .font(.title3)
+                        .fontWeight(.bold)
+                        .padding(.horizontal)
                     
                     LazyVGrid(columns: columns, spacing: 16) {
                         ForEach(Array(recentFiles.prefix(4))) { file in
@@ -64,6 +58,10 @@ struct HomeView: View {
                                 .font(.system(size: 48))
                                 .foregroundColor(Theme.surfaceSecondary)
                             Text("No files yet")
+                                .font(.headline)
+                                .foregroundColor(Theme.textSecondary)
+                            Text("Upload files from the Files tab to get started")
+                                .font(.subheadline)
                                 .foregroundColor(Theme.textSecondary)
                         }
                         .frame(maxWidth: .infinity)

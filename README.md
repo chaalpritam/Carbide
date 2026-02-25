@@ -1,57 +1,50 @@
 # Carbide
 
-Carbide is a premium mobile experience that combines the best of **Google Storage** and **Google Drive**. It provides a sleek, modern interface for managing your files, monitoring storage, and collaborating with others.
-
-![Carbide Home Screen Mockup](mockup.png)
+Carbide is a decentralized file storage app for iOS, powered by the [Carbide Network](https://carbidenetwork.xyz). Upload, manage, and sync files across Carbide's provider network with end-to-end encryption.
 
 ## Features
 
--   **Intelligent Storage Dashboard**: Real-time visualization of your storage usage across Drive, Gmail, and Photos.
--   **Full CRUD Support**: Seamlessly create, rename, and delete files and folders with native iOS/macOS gestures.
--   **Smart Categorization**: Quick-access filters for Images, Videos, Documents, and Audio.
--   **Persistence with SwiftData**: All your changes are saved instantly and synced across the app.
--   **Premium Aesthetics**: Curated Google-inspired color palettes, glassmorphism, and smooth animations.
+- **Decentralized Storage**: Files stored across Carbide network providers, not centralized servers.
+- **End-to-End Encryption**: Files are encrypted before upload via CarbideSDK.
+- **Full File Management**: Create folders, upload photos, rename, delete, star, and share files.
+- **Real-Time Storage Dashboard**: See actual storage usage computed from your files.
+- **Smart Categorization**: Quick-access filters for Images, Videos, Documents, and Audio.
+- **SwiftData Persistence**: All metadata saved locally with SwiftData.
 
 ## Tech Stack
 
--   **SwiftUI**: For a modern, declarative UI.
--   **SwiftData**: Next-generation data persistence and modeling.
--   **Google Design Principles**: Clean, vibrant, and user-centric aesthetics.
+- **SwiftUI** - Declarative UI framework
+- **SwiftData** - Local data persistence
+- **CarbideSDK** - Decentralized storage network client
 
-## Prerequisites
+## Requirements
 
-- **Xcode 15.0+** (for SwiftUI and SwiftData support)
-- **macOS 13.0+** or **iOS 17.0+**
+- Xcode 16.0+
+- iOS 18.1+
 - Swift 5.9+
+- CarbideSDK package (local dependency)
 
 ## Getting Started
 
-1.  Clone the repository:
-    ```bash
-    git clone <repository-url>
-    cd Carbide
-    ```
+1. Clone the repository:
+   ```bash
+   git clone <repository-url>
+   cd Carbide
+   ```
 
-2.  Open `Carbide.xcodeproj` in Xcode.
+2. Add the CarbideSDK local package:
+   - In Xcode: File > Add Package Dependencies > Add Local
+   - Select the `carbide-ios-sdk` directory
 
-3.  Select your target device (iOS Simulator or Mac) from the scheme selector.
+3. Build and run (Cmd+R).
 
-4.  Build and run the project (⌘R).
+## Project Structure
 
-5.  The app will automatically seed itself with demo data on first launch!
-
-## Development
-
-This project uses standard Xcode project structure. User-specific files and build artifacts are excluded via `.gitignore`.
-
-### Project Structure
-
-- `Carbide/` - Main application source code
-  - SwiftUI views and components
-  - SwiftData models and persistence
-  - Storage management utilities
+- `Carbide/` - Main application source
+  - `CarbideApp.swift` - App entry point
+  - `StorageManager.swift` - Carbide network operations
+  - `FileItem.swift` - SwiftData model
+  - Views: `HomeView`, `FilesView`, `SharedView`, `SettingsView`, `FileDetailView`
+  - Components: `FileComponents`, `StorageHeaderView`, `Theme`
 - `CarbideTests/` - Unit tests
 - `CarbideUITests/` - UI tests
-
----
-Built with ❤️ for a better file management experience.
