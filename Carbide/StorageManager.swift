@@ -1,46 +1,9 @@
 import Foundation
 import SwiftData
-
-// NOTE: To use this file, you need to:
-// 1. Add the CarbideSDK package to the Xcode project
-// 2. Uncomment the import line below
-// 3. Build and run
-
 import CarbideSDK
 
-/// Manager for Carbide network storage operations
-///
-/// This class bridges the Carbide iOS app with the CarbideSDK to enable
-/// file upload, download, and synchronization with the Carbide decentralized storage network.
-///
-/// ## Setup
-/// Before using StorageManager:
-/// 1. Add CarbideSDK to the Xcode project:
-///    - File → Add Package Dependencies
-///    - Enter local path: `../carbide-ios-sdk`
-/// 2. Uncomment the `import CarbideSDK` line above
-/// 3. Ensure discovery service is running on localhost:9090
-/// 4. Build and run the app
-///
-/// ## Usage
-/// ```swift
-/// let storageManager = StorageManager(modelContext: modelContext)
-///
-/// // Upload a file
-/// let fileItem = try await storageManager.uploadFile(
-///     from: fileURL,
-///     encrypt: true,
-///     progress: { progress in
-///         print("Upload: \(Int(progress * 100))%")
-///     }
-/// )
-///
-/// // Download a file
-/// let data = try await storageManager.downloadFile(item: fileItem)
-/// ```
 @Observable
 final class StorageManager {
-    // Uncomment when SDK is added to project
     private let client: CarbideClient
     private let modelContext: ModelContext
 
@@ -125,13 +88,10 @@ final class StorageManager {
         // Get provider details
         let provider = try await client.getProvider(id: providerID)
 
-        // Download file (key retrieved from keychain automatically)
         let data = try await client.downloadFile(
             fileID: fileID,
             from: provider,
-            progress: { progress in
-                print("Download progress: \(Int(progress * 100))%")
-            }
+            progress: { _ in }
         )
 
         return data
@@ -158,7 +118,7 @@ final class StorageManager {
                     // Create new FileItem
                     let newItem = FileItem(
                         name: fileMetadata.fileName,
-                        type: .other, // TODO: Determine from content type
+                        type: determineFileType(fromName: fileMetadata.fileName),
                         size: Int64(fileMetadata.fileSize)
                     )
                     newItem.carbideFileID = fileMetadata.id
@@ -201,7 +161,11 @@ final class StorageManager {
     // MARK: - Helper Methods
 
     private func determineFileType(from url: URL) -> FileType {
-        let ext = url.pathExtension.lowercased()
+        determineFileType(fromName: url.lastPathComponent)
+    }
+
+    private func determineFileType(fromName name: String) -> FileType {
+        let ext = (name as NSString).pathExtension.lowercased()
         switch ext {
         case "jpg", "jpeg", "png", "heic", "gif", "webp":
             return .image
@@ -218,126 +182,3 @@ final class StorageManager {
         }
     }
 }
-
-// MARK: - Integration Instructions
-
-/*
- ## How to Integrate CarbideSDK with the iOS App
-
- ### Step 1: Add SDK Package to Xcode Project
-
- 1. Open Carbide.xcodeproj in Xcode
- 2. File → Add Package Dependencies
- 3. Click "Add Local..."
- 4. Navigate to and select: /Users/chaalpritam/Blockbase/carbide-ios-sdk
- 5. Click "Add Package"
- 6. Select the Carbide target and click "Add Package"
-
- ### Step 2: Enable StorageManager
-
- 1. In this file (StorageManager.swift), uncomment:
-    - `import CarbideSDK` at the top
-    - `private let client: CarbideClient` property
-    - SDK initialization in `init()`
-    - All TODO sections in the methods
-
- ### Step 3: Update FilesView for Upload
-
- Add upload functionality to FilesView.swift:
-
- ```swift
- import PhotosUI
-
- @State private var storageManager: StorageManager?
- @State private var selectedPhoto: PhotosPickerItem?
- @State private var uploadProgress: Double = 0.0
- @State private var isUploading = false
-
- // In body:
- PhotosPicker(selection: $selectedPhoto, matching: .images) {
-     Label("Upload Photo", systemImage: "plus.circle.fill")
- }
- .onChange(of: selectedPhoto) { _, newValue in
-     Task { await uploadPhoto(newValue) }
- }
-
- if isUploading {
-     ProgressView(value: uploadProgress, total: 1.0)
-         .padding()
- }
-
- // Add method:
- private func uploadPhoto(_ item: PhotosPickerItem?) async {
-     guard let item = item,
-           let data = try? await item.loadTransferable(type: Data.self) else {
-         return
-     }
-
-     isUploading = true
-     uploadProgress = 0.0
-
-     let tempURL = FileManager.default.temporaryDirectory
-         .appendingPathComponent(UUID().uuidString)
-         .appendingPathExtension("jpg")
-
-     do {
-         try data.write(to: tempURL)
-
-         let fileItem = try await storageManager?.uploadFile(
-             from: tempURL,
-             encrypt: true,
-             progress: { progress in
-                 Task { @MainActor in
-                     uploadProgress = progress
-                 }
-             }
-         )
-
-         try? FileManager.default.removeItem(at: tempURL)
-     } catch {
-         print("Upload failed: \(error)")
-     }
-
-     isUploading = false
- }
-
- // Initialize manager:
- .onAppear {
-     storageManager = StorageManager(modelContext: modelContext)
- }
- ```
-
- ### Step 4: Start Discovery Service
-
- Before running the app, ensure the discovery service is running:
-
- ```bash
- cd /Users/chaalpritam/Blockbase/carbide-discovery-service
- npm install
- npm start
- ```
-
- The discovery service should be running on http://localhost:9090
-
- ### Step 5: Start Provider Node (Optional)
-
- To test uploads, you need at least one provider running:
-
- ```bash
- cd /Users/chaalpritam/Blockbase/carbide-node
- cargo run --bin provider
- ```
-
- ### Step 6: Build and Run
-
- 1. Build the project (Cmd+B)
- 2. Run on simulator or device (Cmd+R)
- 3. Test uploading a photo
- 4. Check that it appears in the files list
-
- ### Troubleshooting
-
- - **"No providers available"**: Ensure discovery service and at least one provider are running
- - **Build errors**: Make sure CarbideSDK package is properly added and imports are uncommented
- - **Connection errors**: Check that localhost:9090 is accessible from the simulator
- */
