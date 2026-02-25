@@ -9,10 +9,29 @@ final class StorageManager {
 
     /// Initialize storage manager
     /// - Parameter modelContext: SwiftData model context
-    init(modelContext: ModelContext) {
+    enum StorageError: LocalizedError {
+        case invalidDiscoveryURL
+        case noProvidersAvailable
+        case fileNotSynced
+
+        var errorDescription: String? {
+            switch self {
+            case .invalidDiscoveryURL:
+                return "Unable to connect to the Carbide network."
+            case .noProvidersAvailable:
+                return "No storage providers are currently available. Please try again later."
+            case .fileNotSynced:
+                return "This file has not been synced to the Carbide network."
+            }
+        }
+    }
+
+    init(modelContext: ModelContext) throws {
         self.modelContext = modelContext
 
-        let discoveryURL = URL(string: "https://discovery.carbidenetwork.xyz")!
+        guard let discoveryURL = URL(string: "https://discovery.carbidenetwork.xyz") else {
+            throw StorageError.invalidDiscoveryURL
+        }
         self.client = CarbideClient(discoveryServiceURL: discoveryURL)
     }
 
@@ -37,9 +56,7 @@ final class StorageManager {
         )
 
         guard let provider = providers.first else {
-            throw NSError(domain: "StorageManager", code: 404, userInfo: [
-                NSLocalizedDescriptionKey: "No providers available"
-            ])
+            throw StorageError.noProvidersAvailable
         }
 
         // 2. Upload file with progress tracking
@@ -80,9 +97,7 @@ final class StorageManager {
     func downloadFile(item: FileItem) async throws -> Data {
         guard let fileID = item.carbideFileID,
               let providerID = item.carbideProviderID else {
-            throw NSError(domain: "StorageManager", code: 400, userInfo: [
-                NSLocalizedDescriptionKey: "File is not synced to Carbide network"
-            ])
+            throw StorageError.fileNotSynced
         }
 
         // Get provider details

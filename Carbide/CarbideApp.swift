@@ -10,23 +10,26 @@ import SwiftData
 
 @main
 struct CarbideApp: App {
-    var sharedModelContainer: ModelContainer = {
-        let schema = Schema([
-            FileItem.self,
-        ])
-        let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
+    private let sharedModelContainer: ModelContainer?
 
-        do {
-            return try ModelContainer(for: schema, configurations: [modelConfiguration])
-        } catch {
-            fatalError("Could not create ModelContainer: \(error)")
-        }
-    }()
+    init() {
+        let schema = Schema([FileItem.self])
+        let config = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
+        self.sharedModelContainer = try? ModelContainer(for: schema, configurations: [config])
+    }
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            if let container = sharedModelContainer {
+                ContentView()
+                    .modelContainer(container)
+            } else {
+                ContentUnavailableView(
+                    "Unable to Load Data",
+                    systemImage: "exclamationmark.triangle",
+                    description: Text("Carbide could not initialize its database. Please restart the app or reinstall.")
+                )
+            }
         }
-        .modelContainer(sharedModelContainer)
     }
 }
