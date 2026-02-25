@@ -26,23 +26,7 @@ struct CarbideApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
-                .onAppear {
-                    seedDataIfNeeded()
-                }
         }
         .modelContainer(sharedModelContainer)
-    }
-    
-    @MainActor
-    private func seedDataIfNeeded() {
-        let context = sharedModelContainer.mainContext
-        let fetchDescriptor = FetchDescriptor<FileItem>()
-        if let count = try? context.fetchCount(fetchDescriptor), count == 0 {
-            let items = FileItem.mockData
-            for item in items {
-                context.insert(item)
-            }
-            try? context.save()
-        }
     }
 }
