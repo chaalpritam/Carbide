@@ -6,7 +6,7 @@ import PhotosUI
 struct FilesView: View {
     @Environment(\.modelContext) private var modelContext
     @Query(filter: #Predicate<FileItem> { $0.parent == nil }, sort: [SortDescriptor(\FileItem.name)]) var rootFiles: [FileItem]
-    
+
     @State private var viewMode: ViewMode = .list
     @State private var showingAddOptions = false
     @State private var showingRenameSheet = false
@@ -16,28 +16,28 @@ struct FilesView: View {
     @State private var selectedPhoto: PhotosPickerItem?
     @State private var uploadProgress: Double = 0.0
     @State private var isUploading = false
-    @State private var uploadError: String?
+    @State private var showingError = false
+    @State private var errorMessage = ""
 
     enum ViewMode {
         case list, grid
     }
-    
+
     var body: some View {
         VStack(spacing: 0) {
-            // Filter Bar
             HStack {
                 Text("\(rootFiles.count) items")
                     .font(.subheadline)
                     .foregroundColor(Theme.textSecondary)
-                
+
                 Spacer()
-                
+
                 HStack(spacing: 16) {
                     Button(action: { viewMode = .list }) {
                         Image(systemName: "list.bullet")
                             .foregroundColor(viewMode == .list ? Theme.primary : Theme.textSecondary)
                     }
-                    
+
                     Button(action: { viewMode = .grid }) {
                         Image(systemName: "square.grid.2x2")
                             .foregroundColor(viewMode == .grid ? Theme.primary : Theme.textSecondary)
@@ -46,9 +46,9 @@ struct FilesView: View {
             }
             .padding()
             .background(Theme.surface)
-            
+
             Divider()
-            
+
             if viewMode == .list {
                 List {
                     ForEach(rootFiles) { item in
@@ -69,7 +69,7 @@ struct FilesView: View {
                             } label: {
                                 Label("Delete", systemImage: "trash")
                             }
-                            
+
                             Button {
                                 itemToRename = item
                                 newName = item.name
@@ -110,13 +110,6 @@ struct FilesView: View {
                     .padding()
                 }
             }
-
-            if let error = uploadError {
-                Text(error)
-                    .foregroundColor(.red)
-                    .font(.caption)
-                    .padding()
-            }
         }
         .background(Theme.background)
         .navigationTitle("My Drive")
@@ -154,7 +147,8 @@ struct FilesView: View {
                         Button("Save") {
                             if let item = itemToRename {
                                 item.name = newName
-                                try? modelContext.save()
+                                item.modifiedAt = Date()
+                                saveContext()
                             }
                             showingRenameSheet = false
                         }
@@ -163,55 +157,71 @@ struct FilesView: View {
             }
             .presentationDetents([.medium])
         }
+        .alert("Error", isPresented: $showingError) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text(errorMessage)
+        }
         .onAppear {
             if storageManager == nil {
-                storageManager = StorageManager(modelContext: modelContext)
+                storageManager = try? StorageManager(modelContext: modelContext)
             }
         }
     }
 
     private func addItem(type: FileType) {
+        let timestamp = Date().formatted(date: .abbreviated, time: .shortened)
         let name: String
         switch type {
-        case .folder: name = "New Folder"
-        case .image: name = "New Photo.jpg"
-        case .document: name = "New Document.docx"
-        default: name = "New Item"
+        case .folder: name = "New Folder \(timestamp)"
+        case .image: name = "Photo \(timestamp).jpg"
+        case .document: name = "Document \(timestamp).docx"
+        default: name = "File \(timestamp)"
         }
-        
+
         let newItem = FileItem(name: name, type: type)
         modelContext.insert(newItem)
+        saveContext()
     }
-    
+
     private func deleteItems(offsets: IndexSet) {
         for index in offsets {
             modelContext.delete(rootFiles[index])
+        }
+        saveContext()
+    }
+
+    private func saveContext() {
+        do {
+            try modelContext.save()
+        } catch {
+            errorMessage = "Could not save your changes. Please try again."
+            showingError = true
         }
     }
 
     private func uploadPhoto(_ item: PhotosPickerItem?) async {
         guard let item = item else { return }
 
-        uploadError = nil
-        isUploading = true
-        uploadProgress = 0.0
+        await MainActor.run {
+            errorMessage = ""
+            isUploading = true
+            uploadProgress = 0.0
+        }
 
         do {
-            // Load photo data
             guard let data = try await item.loadTransferable(type: Data.self) else {
-                throw NSError(domain: "FilesView", code: 1,
-                             userInfo: [NSLocalizedDescriptionKey: "Could not load photo data"])
+                throw StorageManager.StorageError.fileNotSynced
             }
 
-            // Write to temp file
             let tempURL = FileManager.default.temporaryDirectory
                 .appendingPathComponent(UUID().uuidString)
                 .appendingPathExtension("jpg")
 
             try data.write(to: tempURL)
+            defer { try? FileManager.default.removeItem(at: tempURL) }
 
-            // Upload via StorageManager
-            let fileItem = try await storageManager?.uploadFile(
+            _ = try await storageManager?.uploadFile(
                 from: tempURL,
                 encrypt: true,
                 progress: { progress in
@@ -221,10 +231,6 @@ struct FilesView: View {
                 }
             )
 
-            // Cleanup temp file
-            try? FileManager.default.removeItem(at: tempURL)
-
-            // Reset state
             await MainActor.run {
                 isUploading = false
                 selectedPhoto = nil
@@ -232,8 +238,9 @@ struct FilesView: View {
 
         } catch {
             await MainActor.run {
-                uploadError = "Upload failed: \(error.localizedDescription)"
                 isUploading = false
+                errorMessage = "Upload failed. Please check your connection and try again."
+                showingError = true
             }
         }
     }
@@ -241,7 +248,7 @@ struct FilesView: View {
 
 struct FolderDetailView: View {
     let folder: FileItem
-    
+
     var body: some View {
         List {
             if !folder.children.isEmpty {
