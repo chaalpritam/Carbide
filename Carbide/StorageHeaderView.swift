@@ -1,14 +1,29 @@
 
 import SwiftUI
+import SwiftData
 
 struct StorageHeaderView: View {
-    var usedStorage: Int64 = 12 * 1024 * 1024 * 1024 // 12GB
-    var totalStorage: Int64 = 15 * 1024 * 1024 * 1024 // 15GB
-    
-    var progress: Double {
-        Double(usedStorage) / Double(totalStorage)
+    @Query var allFiles: [FileItem]
+
+    private let totalStorage: Int64 = 15 * 1024 * 1024 * 1024 // 15GB plan
+
+    private var usedStorage: Int64 {
+        allFiles.reduce(0) { $0 + $1.size }
     }
-    
+
+    private var progress: Double {
+        guard totalStorage > 0 else { return 0 }
+        return min(Double(usedStorage) / Double(totalStorage), 1.0)
+    }
+
+    private var documentsSize: Int64 {
+        allFiles.filter { [.document, .pdf, .spreadsheet, .other].contains($0.type) }.reduce(0) { $0 + $1.size }
+    }
+
+    private var mediaSize: Int64 {
+        allFiles.filter { [.image, .video].contains($0.type) }.reduce(0) { $0 + $1.size }
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             HStack {
@@ -16,26 +31,25 @@ struct StorageHeaderView: View {
                     Text("Storage")
                         .font(.headline)
                         .foregroundColor(Theme.textMain)
-                    
+
                     Text("\(format(usedStorage)) of \(format(totalStorage)) used")
                         .font(.subheadline)
                         .foregroundColor(Theme.textSecondary)
                 }
-                
+
                 Spacer()
-                
+
                 Image(systemName: "cloud.fill")
                     .font(.title2)
                     .foregroundColor(Theme.primary)
             }
-            
-            // Progress Bar
+
             GeometryReader { geo in
                 ZStack(alignment: .leading) {
                     Capsule()
                         .fill(Theme.surfaceSecondary)
                         .frame(height: 8)
-                    
+
                     Capsule()
                         .fill(
                             LinearGradient(
@@ -48,11 +62,10 @@ struct StorageHeaderView: View {
                 }
             }
             .frame(height: 8)
-            
+
             HStack(spacing: 20) {
-                storageBreakdown(label: "Drive", color: Theme.primary, percentage: 0.6)
-                storageBreakdown(label: "Gmail", color: Theme.secondary, percentage: 0.2)
-                storageBreakdown(label: "Photos", color: Theme.tertiary, percentage: 0.1)
+                storageBreakdown(label: "Documents", color: Theme.primary)
+                storageBreakdown(label: "Media", color: Theme.quaternary)
             }
         }
         .padding(20)
@@ -60,8 +73,8 @@ struct StorageHeaderView: View {
         .cornerRadius(Theme.cardRadius)
         .shadow(color: Theme.cardShadow, radius: 10, x: 0, y: 5)
     }
-    
-    private func storageBreakdown(label: String, color: Color, percentage: Double) -> some View {
+
+    private func storageBreakdown(label: String, color: Color) -> some View {
         HStack(spacing: 6) {
             Circle()
                 .fill(color)
@@ -71,7 +84,7 @@ struct StorageHeaderView: View {
                 .foregroundColor(Theme.textSecondary)
         }
     }
-    
+
     private func format(_ bytes: Int64) -> String {
         let formatter = ByteCountFormatter()
         formatter.allowedUnits = [.useGB, .useMB]
@@ -84,4 +97,5 @@ struct StorageHeaderView: View {
     StorageHeaderView()
         .padding()
         .background(Theme.background)
+        .modelContainer(for: FileItem.self, inMemory: true)
 }
