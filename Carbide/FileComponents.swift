@@ -3,19 +3,20 @@ import SwiftUI
 
 struct FileCardView: View {
     let item: FileItem
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
                 Image(systemName: item.type.icon)
                     .font(.title2)
                     .foregroundColor(item.type.color)
-                
+
                 Spacer()
-                
-                Button(action: {}) {
-                    Image(systemName: "ellipsis")
-                        .foregroundColor(Theme.textSecondary)
+
+                if item.isStarred {
+                    Image(systemName: "star.fill")
+                        .font(.caption)
+                        .foregroundColor(Theme.tertiary)
                 }
             }
             
